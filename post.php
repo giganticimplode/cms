@@ -17,7 +17,13 @@
 
             if (isset($_GET['p_id'])) {
                 $the_post_id = $_GET['p_id'];
-            }
+
+                $view_query = "UPDATE posts SET post_views_count = post_views_count + 1 WHERE post_id = $the_post_id ";
+                $send_query = mysqli_query($connection, $view_query);
+
+                if (!$send_query) {
+                  die("Query Failed");
+                }
 
             $query = "SELECT * FROM posts WHERE post_id = $the_post_id ";
             $select_all_posts_query = mysqli_query($connection, $query);
@@ -51,38 +57,47 @@
 
             <hr>
 
-            <?php
+            <?php }
 
-                }
+          } else {
 
-             ?>
+            header("Location: index.php");
+
+          }
+
+          ?>
 
                             <!-- Blog Comments -->
 
                             <?php
 
                             if (isset($_POST['create_comment'])) {
-                               $the_post_id = $_GET['p_id'];
 
-                               $comment_author = $_POST['comment_author'];
-                               $comment_email = $_POST['comment_email'];
-                               $comment_content = $_POST['comment_content'];
+                              $the_post_id = $_GET['p_id'];
 
-                               $query = "INSERT INTO comments (comment_post_id, comment_author, comment_email, comment_content, comment_status, comment_date)";
-                               $query .= "VALUES ($the_post_id, '{$comment_author}', '{$comment_email}', '{$comment_content}', 'unapproved', now())";
+                              $comment_author = $_POST['comment_author'];
+                              $comment_email = $_POST['comment_email'];
+                              $comment_content = $_POST['comment_content'];
 
-                               $create_comment_query = mysqli_query($connection, $query);
+                              if (!empty($comment_author) && !empty($comment_email) && !empty($comment_content)) {
 
-                                    if (!$create_comment_query) {
-                                        die('QUERY FAILED' . mysqli_error($connection));
-                                    }
+                                $query = "INSERT INTO comments (comment_post_id, comment_author, comment_email, comment_content, comment_status, comment_date)";
+                                $query .= "VALUES ($the_post_id, '{$comment_author}', '{$comment_email}', '{$comment_content}', 'unapproved', now())";
 
-                                    $query = "UPDATE posts SET post_comment_count = post_comment_count + 1 ";
-                                    $query .= "WHERE post_id = $the_post_id ";
-                                    $update_comment_count = mysqli_query($connection, $query);
+                                $create_comment_query = mysqli_query($connection, $query);
 
-                            }
+                                     if (!$create_comment_query) {
+                                         die('QUERY FAILED' . mysqli_error($connection));
+                                     }
 
+                                     $query = "UPDATE posts SET post_comment_count = post_comment_count + 1 ";
+                                     $query .= "WHERE post_id = $the_post_id ";
+                                     $update_comment_count = mysqli_query($connection, $query);
+
+                                   } else {
+                                     echo "<script>alert('Fields can not be enpty!')</script>";
+                                   }
+                              }
 
                              ?>
 
@@ -100,7 +115,7 @@
                         </div>
                         <div class="form-group">
                             <label for="comment"> Your Comment</label>
-                            <textarea name="comment_content" class="form-control" rows="3"></textarea>
+                            <textarea name="comment_content" class="form-control" rows="3" id=""></textarea>
                         </div>
                         <button type="submit" name="create_comment" class="btn btn-primary">Submit</button>
                     </form>
